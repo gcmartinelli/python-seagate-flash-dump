@@ -21,13 +21,14 @@ import re
 
 port = '/dev/ttyUSB0'
 baudrate = 38400
-timeout = 1
+timeout = 0.2
 
 def send_command(cmd):
-    cmd += '\r'
-    ser.write(cmd.encode())
+    ser.write(cmd)
 
-with serial.Serial(port, baudrate, timeout=timeout) as ser:
+with serial.Serial(port=port, 
+                    baudrate=baudrate, 
+                    timeout=timeout) as ser:
     try:
         start = sys.argv[1]
         end = sys.argv[2]
@@ -46,10 +47,10 @@ with serial.Serial(port, baudrate, timeout=timeout) as ser:
     high_start = start[:4]
     low_start = start[4:]
 
-    send_command('/1') # Go to the right level
+    send_command(b'/1\r') # Go to the right level
     with open(filename,'ab') as f:
         while True:
-            send_command(f'D{high_start},{low_start}')
+            send_command(f'D{high_start},{low_start}\r'.encode())
             for line in ser.readlines():
                 if re.match(b'[0-9A-F]{8}', line[:8]) != None:
                     f.write(line)
