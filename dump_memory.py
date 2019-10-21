@@ -2,14 +2,16 @@
 ''' 
     Dumps Seagate Flash Memory.
 
-    HDD must be connected to the computer via serial,
-    configuration of the port variable may be necessary.
+    HDD must be connected to the computer via serial, and be
+    in 'diagnostic ASCII mode'.
+
+    Configuration of the port variable may be necessary.
 
     The process is slow (around 2 seconds per 512 byte sector)
 
     Tested on Seagate ST3160318AS only.
 
-    Use at your own risk... it is easy to brick a HDD, trust me ;)
+    Use at your own risk... it is very easy to brick a HDD, trust me ;)
 
 '''
 
@@ -45,15 +47,13 @@ with serial.Serial(port, baudrate, timeout=timeout) as ser:
     low_start = start[4:]
 
     send_command('/1') # Go to the right level
-    with open(filename,'a') as f:
+    with open(filename,'ab') as f:
         while True:
             send_command(f'D{high_start},{low_start}')
             for line in ser.readlines():
-                if re.match('[0-9A-F]{8}', line.decode('ascii')[:8]) != None:
-                    print(line.decode('ascii'), end='')
-                    f.write(line.decode('ascii'))
+                if re.match(b'[0-9A-F]{8}', line[:8]) != None:
+                    f.write(line)
                 else:
-                    #print(f'No match > {line.decode("ascii")[:8]}')
                     pass
             start_value = int(start, 16) + 512
             if start_value > end_value:
