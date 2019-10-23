@@ -21,7 +21,7 @@ import re
 
 port = '/dev/ttyUSB0'
 baudrate = 38400
-timeout = 0.2
+timeout = 0.05
 
 def send_command(cmd):
     ser.write(cmd)
